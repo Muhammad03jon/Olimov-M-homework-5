@@ -38,7 +38,7 @@ with st.sidebar:
     elif model_choice == "Дерево решений":
         max_depth = st.slider('max_depth', 1, 10, 5)
     elif model_choice == "Логистическая регрессия":
-        solver = st.selectbox("Выберите алгоритм оптимизации:", ["liblinear", "lbfgs", "sag", "saga"])
+        solver = st.selectbox("Выберите алгоритм оптимизации:", ["liblinear", "lbfgs"])
         C = st.slider('C (обратная регуляризация)', 0.01, 10.0, 1.0)
 
     use_random_sample = st.checkbox("📌 Использовать случайный образец")

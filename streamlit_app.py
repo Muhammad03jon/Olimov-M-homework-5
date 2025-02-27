@@ -57,7 +57,10 @@ for i, col in enumerate(["variance", "skewness", "curtosis", "entropy"]):
     ax.hist(df[col], bins=30, color="skyblue", edgecolor="black")
     ax.set_title(f"Гистограмма: {col}")
     ax.set_xlabel(col)
-    ax.set_ylabel("Частота", labelpad=15)  # Увеличение отступа между меткой и осью Y
+    ax.set_ylabel("Частота")
+
+# Увеличиваем отступы между графиками
+plt.subplots_adjust(wspace=0.4, hspace=0.4)  # Увеличение горизонтального и вертикального отступов
 
 st.pyplot(fig)
 

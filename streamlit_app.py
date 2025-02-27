@@ -45,6 +45,13 @@ with st.sidebar:
         curtosis = st.slider('Curtosis', float(df["curtosis"].min()), float(df["curtosis"].max()), float(df["curtosis"].mean()))
         entropy = st.slider('Entropy', float(df["entropy"].min()), float(df["entropy"].max()), float(df["entropy"].mean()))
 
+    data = {
+    "variance": variance,
+    "skewness": skewness,
+    "curtosis": curtosis,
+    "entropy": entropy
+    }
+
     # Отображение выбранных значений
     st.write(f"Выбранные значения:\n- Variance: {variance}\n- Skewness: {skewness}\n- Curtosis: {curtosis}\n- Entropy: {entropy}")
 
@@ -74,3 +81,18 @@ for i, col in enumerate(["variance", "skewness", "curtosis", "entropy"]):
 plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
 st.pyplot(fig)
+
+input_df = pd.DataFrame(data, index=[0])
+
+# Объединение введенных данных с исходными данными
+input_banknotes = pd.concat([input_df, df], axis=0)
+
+# Отображение данных во вкладке развертывания
+with st.expander('Input features'):
+    st.write('**Input Data**')
+    st.dataframe(input_df)
+    st.write('**Combined Data** (input row + original data)')
+    st.dataframe(input_banknotes)
+
+X = input_banknotes[1:]
+input_row = input_banknotes[:1]

@@ -24,4 +24,19 @@ with st.expander('Data'):
         y_raw = df['class']
         st.dataframe(y_raw.to_frame().style.set_properties(**{'background-color': '#e8f4ea', 'color': 'black'}))
 
+with st.sidebar:
+    st.header("Введите признаки: ")
 
+    if st.button("🎲 Выбрать случайный образец"):
+        random_sample = df.sample(1).iloc[0]
+        variance = random_sample["variance"]
+        skewness = random_sample["skewness"]
+        curtosis = random_sample["curtosis"]
+        entropy = random_sample["entropy"]
+    else:
+        variance = st.slider('Variance', float(df["variance"].min()), float(df["variance"].max()), float(df["variance"].mean()))
+        skewness = st.slider('Skewness', float(df["skewness"].min()), float(df["skewness"].max()), float(df["skewness"].mean()))
+        curtosis = st.slider('Curtosis', float(df["curtosis"].min()), float(df["curtosis"].max()), float(df["curtosis"].mean()))
+        entropy = st.slider('Entropy', float(df["entropy"].min()), float(df["entropy"].max()), float(df["entropy"].mean()))
+
+    st.write(f"Выбранные значения:\n- Variance: {variance}\n- Skewness: {skewness}\n- Curtosis: {curtosis}\n- Entropy: {entropy}")

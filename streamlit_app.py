@@ -104,6 +104,9 @@ X_test_scaled = pd.DataFrame(X_test_scaled, columns=X_train.columns)
 
 # Обучение моделей
 
+unique_values = df.nunique()
+features_10 = unique_values[unique_values > 10].index
+correlation = df[features_10].corrwith(df['class']).abs()
 top_2_features = correlation.index[:2]
 
 X_train_scaled = X_train_scaled[top_2_features]

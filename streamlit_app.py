@@ -10,34 +10,35 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from mlxtend.plotting import plot_decision_regions
 
+# Заголовок приложения
 st.title('Предсказание реальной или фальшивой банкноты')
 
+# Загрузка данных
 file_path = "https://raw.githubusercontent.com/Muhammad03jon/Olimov-M-homework-5/refs/heads/master/data_banknote_authentication.txt"
-
 df = pd.read_csv(file_path, sep=",", header=None)
 df.columns = ["variance", "skewness", "curtosis", "entropy", "class"]
 
-with st.expander('Data'):
-    col1, col2 = st.columns(2)  # Две колонки
-
+# Отображение данных
+with st.expander('Данные'):
+    col1, col2 = st.columns(2)
     with col1:
-        st.subheader("X (Features)")
+        st.subheader("X (Признаки)")
         X_raw = df.drop('class', axis=1)
         st.dataframe(X_raw.style.set_properties(**{'background-color': '#f0f2f6', 'color': 'black'}))
 
     with col2:
-        st.subheader("y (Target)")
+        st.subheader("y (Цель)")
         y_raw = df['class']
         st.dataframe(y_raw.to_frame().style.set_properties(**{'background-color': '#e8f4ea', 'color': 'black'}))
 
+# Ввод признаков через боковую панель
 with st.sidebar:
-    st.header("Введите признаки: ")
-
-    # Переключатель для выбора между вводом значений и случайным образцом
+    st.header("Введите признаки:")
+    
+    # Переключатель для случайного образца
     use_random_sample = st.checkbox("Использовать случайный образец")
 
     if use_random_sample:
-        # Выбор случайного образца из данных
         random_sample = df.sample(1).iloc[0]
         variance = random_sample["variance"]
         skewness = random_sample["skewness"]
@@ -52,10 +53,10 @@ with st.sidebar:
         entropy = st.slider('Entropy', float(df["entropy"].min()), float(df["entropy"].max()), float(df["entropy"].mean()))
 
     data = {
-    "variance": variance,
-    "skewness": skewness,
-    "curtosis": curtosis,
-    "entropy": entropy
+        "variance": variance,
+        "skewness": skewness,
+        "curtosis": curtosis,
+        "entropy": entropy
     }
 
     # Отображение выбранных значений
@@ -85,17 +86,13 @@ for i, col in enumerate(["variance", "skewness", "curtosis", "entropy"]):
 
 # Увеличиваем отступы между графиками
 plt.subplots_adjust(wspace=0.4, hspace=0.4)
-
 st.pyplot(fig)
 
 # Train test split
-
 X_train, X_test, y_train, y_test = train_test_split(X_raw, y_raw, test_size=0.3, random_state=42)
 
-# StandardScaling
-
+# StandardScaler
 scaler = StandardScaler()
-
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
@@ -103,38 +100,16 @@ X_train_scaled = pd.DataFrame(X_train_scaled, columns=X_train.columns)
 X_test_scaled = pd.DataFrame(X_test_scaled, columns=X_train.columns)
 
 # Обучение моделей
-
-unique_values = df.nunique()
-features_10 = unique_values[unique_values > 10].index
-correlation = df[features_10].corrwith(df['class']).abs()
-top_2_features = correlation.index[:2]
-
-X_train_scaled = X_train_scaled[top_2_features]
-X_test_scaled = X_test_scaled[top_2_features]
-
-# KNeighborsClassifier
-
 knn = KNeighborsClassifier(n_neighbors=3)
 knn.fit(X_train_scaled, y_train)
-y_proba_knn_train = knn.predict_proba(X_train_scaled)[:, 1]
-y_proba_knn_test = knn.predict_proba(X_test_scaled)[:, 1]
-
-# LogisticRegression
 
 log_reg = LogisticRegression(max_iter=565)
 log_reg.fit(X_train_scaled, y_train)
-y_proba_lg_train = log_reg.predict_proba(X_train_scaled)[:, 1]
-y_proba_lg_test = log_reg.predict_proba(X_test_scaled)[:, 1]
-
-# DecisionTreeClassifier
 
 d_tree = DecisionTreeClassifier(max_depth=5)
 d_tree.fit(X_train_scaled, y_train)
-y_proba_dtree_train = d_tree.predict_proba(X_train_scaled)[:, 1]
-y_proba_dtree_test = d_tree.predict_proba(X_test_scaled)[:, 1]
 
 # Визуализация границ решений
-
 X_array = X_train_scaled.to_numpy() 
 y_array = y_train.to_numpy()
 
@@ -144,11 +119,26 @@ titles = ['KNeighborsClassifier', 'Logistic Regression', 'Decision Tree']
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
 for ax, clf, title in zip(axes, classifiers, titles):
-
     plot_decision_regions(X_array, y_array, clf=clf, ax=ax)
     ax.set_title(title)
     ax.set_xlabel('variance')
     ax.set_ylabel('skewness')
 
 plt.tight_layout()
-plt.show()
+st.pyplot(fig)
+
+# Предсказание
+if st.button("Предсказать"):
+    input_data = np.array([[variance, skewness, curtosis, entropy]])
+    input_scaled = scaler.transform(input_data)  # Применение стандартизации
+
+    # Предсказание с помощью каждой из моделей
+    prediction_knn = knn.predict(input_scaled)[0]
+    prediction_log_reg = log_reg.predict(input_scaled)[0]
+    prediction_dtree = d_tree.predict(input_scaled)[0]
+
+    # Отображение результатов предсказания
+    st.subheader("Результаты предсказания:")
+    st.write(f"KNeighborsClassifier: {'Фальшивая' if prediction_knn == 0 else 'Настоящая'} банкнота")
+    st.write(f"Logistic Regression: {'Фальшивая' if prediction_log_reg == 0 else 'Настоящая'} банкнота")
+    st.write(f"Decision Tree: {'Фальшивая' if prediction_dtree == 0 else 'Настоящая'} банкнота")

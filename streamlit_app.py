@@ -48,8 +48,12 @@ with st.sidebar:
         curtosis = st.slider('Curtosis', float(df["curtosis"].min()), float(df["curtosis"].max()), float(df["curtosis"].mean()))
         entropy = st.slider('Entropy', float(df["entropy"].min()), float(df["entropy"].max()), float(df["entropy"].mean()))
 
-    data = {"variance": variance, "skewness": skewness, "curtosis": curtosis, "entropy": entropy}
-    st.write("**Выбранные значения:**", data)
+    # Отображение выбранных значений
+    st.write("**Выбранные значения:**")
+    st.write(f"Variance: {variance}")
+    st.write(f"Skewness: {skewness}")
+    st.write(f"Curtosis: {curtosis}")
+    st.write(f"Entropy: {entropy}")
 
 # Визуализация данных
 st.subheader("📊 Анализ данных")
@@ -79,14 +83,15 @@ else:  # Дерево решений
 # Обучение модели
 model.fit(X_train_scaled, y_train)
 
-# Предсказание
-sample_df = pd.DataFrame([data])
-sample_scaled = scaler.transform(sample_df)
+# Кнопка для предсказания
+if st.button("Предсказать"):
+    sample_df = pd.DataFrame([data])
+    sample_scaled = scaler.transform(sample_df)
 
-prediction = model.predict(sample_scaled)[0]
+    prediction = model.predict(sample_scaled)[0]
 
-st.subheader("🔮 Результаты предсказания")
-st.metric("Предсказание", "Реальная" if prediction == 0 else "Фальшивая")
+    st.subheader("🔮 Результаты предсказания")
+    st.metric("Предсказание", "Реальная" if prediction == 0 else "Фальшивая")
 
 # Тестирование точности на новых данных
 st.header("📥 Тестирование на новых данных")

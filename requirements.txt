@@ -4,4 +4,4 @@ numpy
 matplotlib
 seaborn
 scikit-learn
-mpl_toolkits
+mpl_toolkits.mplot3d

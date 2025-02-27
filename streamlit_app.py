@@ -8,7 +8,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
-from mlxtend.plotting import plot_decision_regions
 
 # Заголовок приложения
 st.title('Предсказание реальной или фальшивой банкноты')
@@ -112,20 +111,6 @@ d_tree.fit(X_train_scaled, y_train)
 # Визуализация границ решений
 X_array = X_train_scaled.to_numpy() 
 y_array = y_train.to_numpy()
-
-classifiers = [knn, log_reg, d_tree]
-titles = ['KNeighborsClassifier', 'Logistic Regression', 'Decision Tree']
-
-fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-
-for ax, clf, title in zip(axes, classifiers, titles):
-    plot_decision_regions(X_array, y_array, clf=clf, ax=ax)
-    ax.set_title(title)
-    ax.set_xlabel('variance')
-    ax.set_ylabel('skewness')
-
-plt.tight_layout()
-st.pyplot(fig)
 
 # Предсказание
 if st.button("Предсказать"):

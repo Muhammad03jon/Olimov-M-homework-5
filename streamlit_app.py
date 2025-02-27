@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from mpl_toolkits.mplot3d import Axes3D
 
 st.title('Предсказание реальной или фальшивой банкноты')
 
@@ -89,7 +88,6 @@ features_10 = unique_values[unique_values > 10].index
 
 correlation = df[features_10].corrwith(df['class']).abs()
 top_features = correlation.nlargest(3).index.tolist()
-top_features
 
 fig = plt.figure(figsize=(16, 10))
 ax = fig.add_subplot(111, projection='3d')

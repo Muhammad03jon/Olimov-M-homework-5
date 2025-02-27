@@ -83,6 +83,14 @@ plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
 st.pyplot(fig)
 
+unique_values = df.nunique()
+
+features_10 = unique_values[unique_values > 10].index
+
+correlation = df[features_10].corrwith(df['class']).abs()
+top_features = correlation.nlargest(3).index.tolist()
+top_features
+
 fig = plt.figure(figsize=(16, 10))
 ax = fig.add_subplot(111, projection='3d')
 

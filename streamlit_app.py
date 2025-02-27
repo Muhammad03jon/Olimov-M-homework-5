@@ -85,6 +85,7 @@ model.fit(X_train_scaled, y_train)
 
 # Кнопка для предсказания
 if st.button("Предсказать"):
+    data = {"variance": variance, "skewness": skewness, "curtosis": curtosis, "entropy": entropy}  # Определение data
     sample_df = pd.DataFrame([data])
     sample_scaled = scaler.transform(sample_df)
 

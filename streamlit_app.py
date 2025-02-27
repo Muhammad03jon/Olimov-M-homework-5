@@ -110,39 +110,59 @@ if uploaded_file is not None:
 # Визуализация важности признаков для дерева решений
 if model_choice == "Дерево решений":
     importance = model.feature_importances_
-    feature_names = X_raw.columns
     fig, ax = plt.subplots()
-    ax.barh(feature_names, importance)
+    ax.barh(X_raw.columns, importance)
     ax.set_xlabel('Важность признаков')
     ax.set_title('Важность признаков для дерева решений')
     st.pyplot(fig)
 
 # Графики метрик качества моделей
 if st.button("Показать метрики качества"):
-    y_pred = model.predict(X_test_scaled)
-    accuracy = (y_pred == y_test).mean()
-    st.subheader("📊 Метрики качества модели")
-    st.write("Матрица ошибок:")
-    conf_matrix = confusion_matrix(y_test, y_pred)
-    st.write(conf_matrix)
+    y_pred_train = model.predict(X_train_scaled)
+    y_pred_test = model.predict(X_test_scaled)
 
-    report = classification_report(y_test, y_pred, output_dict=True)
-    st.write("Отчет по метрикам:")
-    st.write(f"Precision: {report['0']['precision']:.2f}, Recall: {report['0']['recall']:.2f}, F1-score: {report['0']['f1-score']:.2f}")
-    st.write(f"Accuracy: {accuracy:.2f}")
+    # Accuracy
+    accuracy_train = (y_pred_train == y_train).mean()
+    accuracy_test = (y_pred_test == y_test).mean()
+    
+    # Метрики качества
+    report_train = classification_report(y_train, y_pred_train, output_dict=True)
+    report_test = classification_report(y_test, y_pred_test, output_dict=True)
+
+    st.subheader("📊 Метрики качества модели")
+    
+    # Таблица с метриками
+    metrics_df = pd.DataFrame({
+        'Metric': ['Precision (Train)', 'Recall (Train)', 'F1-score (Train)', 'Accuracy (Train)',
+                   'Precision (Test)', 'Recall (Test)', 'F1-score (Test)', 'Accuracy (Test)'],
+        'Value': [
+            report_train['1']['precision'], report_train['1']['recall'], report_train['1']['f1-score'], accuracy_train,
+            report_test['1']['precision'], report_test['1']['recall'], report_test['1']['f1-score'], accuracy_test
+        ]
+    })
+    st.table(metrics_df)
+
+    # Матрица ошибок
+    conf_matrix = confusion_matrix(y_test, y_pred_test)
+    fig, ax = plt.subplots()
+    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', ax=ax)
+    ax.set_xlabel('Предсказание')
+    ax.set_ylabel('Истинные значения')
+    ax.set_title('Матрица ошибок')
+    st.pyplot(fig)
 
     # ROC AUC
     y_scores = model.predict_proba(X_test_scaled)[:, 1]
     fpr, tpr, thresholds = roc_curve(y_test, y_scores)
     roc_auc = auc(fpr, tpr)
 
-    plt.figure()
-    plt.plot(fpr, tpr, label=f'ROC curve (area = {roc_auc:.2f})')
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic (ROC)')
-    plt.legend(loc="lower right")
-    st.pyplot()
+    fig, ax = plt.subplots()
+    ax.plot(fpr, tpr, label=f'ROC curve (area = {roc_auc:.2f})')
+    ax.plot([0, 1], [0, 1], 'k--')
+    ax.set_xlim([0.0, 1.0])
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlabel('False Positive Rate')
+    ax.set_ylabel('True Positive Rate')
+    ax.set_title('Receiver Operating Characteristic (ROC)')
+    ax.legend(loc="lower right")
+    st.pyplot(fig)

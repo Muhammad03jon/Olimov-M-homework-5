@@ -3,6 +3,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from mlxtend.plotting import plot_decision_regions
 
 st.title('Предсказание реальной или фальшивой банкноты')
 
@@ -82,29 +88,64 @@ plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
 st.pyplot(fig)
 
-unique_values = df.nunique()
+# Train test split
 
-features_10 = unique_values[unique_values > 10].index
+X_train, X_test, y_train, y_test = train_test_split(X_raw, y_raw, test_size=0.3, random_state=42)
 
-correlation = df[features_10].corrwith(df['class']).abs()
-top_features = correlation.nlargest(3).index.tolist()
+# StandardScaling
 
-fig = plt.figure(figsize=(16, 10))
-ax = fig.add_subplot(111, projection='3d')
+scaler = StandardScaler()
 
-colors = {0: 'blue', 1: 'red'}
-markers = {0: 'o', 1: 'o'}
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
-for class_label in df['class'].unique():
-    subset = df[df['class'] == class_label]
-    ax.scatter(subset[top_features[0]], subset[top_features[1]], subset[top_features[2]],
-               c=colors[class_label], marker=markers[class_label], label=f'Класс {class_label}', alpha=0.7)
+X_train_scaled = pd.DataFrame(X_train_scaled, columns=X_train.columns)
+X_test_scaled = pd.DataFrame(X_test_scaled, columns=X_train.columns)
 
-ax.set_xlabel(top_features[0])
-ax.set_ylabel(top_features[1])
-ax.set_zlabel(top_features[2])
+# Обучение моделей
 
-ax.set_title("3D Визуализация набора данных Banknote Authentication")
-ax.legend()
+top_2_features = correlation.index[:2]
 
+X_train_scaled = X_train_scaled[top_2_features]
+X_test_scaled = X_test_scaled[top_2_features]
+
+# KNeighborsClassifier
+
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train_scaled, y_train)
+y_proba_knn_train = knn.predict_proba(X_train_scaled)[:, 1]
+y_proba_knn_test = knn.predict_proba(X_test_scaled)[:, 1]
+
+# LogisticRegression
+
+log_reg = LogisticRegression(max_iter=565)
+log_reg.fit(X_train_scaled, y_train)
+y_proba_lg_train = log_reg.predict_proba(X_train_scaled)[:, 1]
+y_proba_lg_test = log_reg.predict_proba(X_test_scaled)[:, 1]
+
+# DecisionTreeClassifier
+
+d_tree = DecisionTreeClassifier(max_depth=5)
+d_tree.fit(X_train_scaled, y_train)
+y_proba_dtree_train = d_tree.predict_proba(X_train_scaled)[:, 1]
+y_proba_dtree_test = d_tree.predict_proba(X_test_scaled)[:, 1]
+
+# Визуализация границ решений
+
+X_array = X_train_scaled.to_numpy() 
+y_array = y_train.to_numpy()
+
+classifiers = [knn, log_reg, d_tree]
+titles = ['KNeighborsClassifier', 'Logistic Regression', 'Decision Tree']
+
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+
+for ax, clf, title in zip(axes, classifiers, titles):
+
+    plot_decision_regions(X_array, y_array, clf=clf, ax=ax)
+    ax.set_title(title)
+    ax.set_xlabel('variance')
+    ax.set_ylabel('skewness')
+
+plt.tight_layout()
 plt.show()

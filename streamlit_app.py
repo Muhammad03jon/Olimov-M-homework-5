@@ -64,9 +64,11 @@ plt.subplots_adjust(wspace=0.4, hspace=0.4)  # Увеличение горизо
 
 st.pyplot(fig)
 
-# 2. Корреляционная матрица
-st.subheader("Корреляционная матрица")
+# 2. График рассеяния между variance и entropy
+st.subheader("График рассеяния: Variance vs. Entropy")
 plt.figure(figsize=(8, 6))
-corr = df.corr()
-sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm', square=True)
+sns.scatterplot(data=df, x='variance', y='entropy', hue='class', palette='Set1', alpha=0.7)
+plt.title("Зависимость Variance от Entropy")
+plt.xlabel("Variance")
+plt.ylabel("Entropy")
 st.pyplot(plt)

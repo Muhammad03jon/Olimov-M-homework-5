@@ -48,3 +48,22 @@ with st.sidebar:
     # Отображение выбранных значений
     st.write(f"Выбранные значения:\n- Variance: {variance}\n- Skewness: {skewness}\n- Curtosis: {curtosis}\n- Entropy: {entropy}")
 
+st.subheader("📊 Анализ данных")
+
+# 1. Гистограммы для каждого признака
+fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+for i, col in enumerate(["variance", "skewness", "curtosis", "entropy"]):
+    ax = axes[i // 2, i % 2]
+    ax.hist(df[col], bins=30, color="skyblue", edgecolor="black")
+    ax.set_title(f"Гистограмма: {col}")
+    ax.set_xlabel(col)
+    ax.set_ylabel("Частота")
+
+st.pyplot(fig)
+
+# 2. Корреляционная матрица
+st.subheader("Корреляционная матрица")
+plt.figure(figsize=(8, 6))
+corr = df.corr()
+sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm', square=True)
+st.pyplot(plt)

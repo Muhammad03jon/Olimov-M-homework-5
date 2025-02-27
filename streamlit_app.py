@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from mpl_toolkits.mplot3d import Axes3D
 
 st.title('Предсказание реальной или фальшивой банкноты')
 
@@ -82,17 +83,22 @@ plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
 st.pyplot(fig)
 
-input_df = pd.DataFrame(data, index=[0])
+fig = plt.figure(figsize=(16, 10))
+ax = fig.add_subplot(111, projection='3d')
 
-# Объединение введенных данных с исходными данными
-input_banknotes = pd.concat([input_df, df], axis=0)
+colors = {0: 'blue', 1: 'red'}
+markers = {0: 'o', 1: 'o'}
 
-# Отображение данных во вкладке развертывания
-with st.expander('Input features'):
-    st.write('**Input Data**')
-    st.dataframe(input_df)
-    st.write('**Combined Data** (input row + original data)')
-    st.dataframe(input_banknotes)
+for class_label in df['class'].unique():
+    subset = df[df['class'] == class_label]
+    ax.scatter(subset[top_features[0]], subset[top_features[1]], subset[top_features[2]],
+               c=colors[class_label], marker=markers[class_label], label=f'Класс {class_label}', alpha=0.7)
 
-X = input_banknotes[1:]
-input_row = input_banknotes[:1]
+ax.set_xlabel(top_features[0])
+ax.set_ylabel(top_features[1])
+ax.set_zlabel(top_features[2])
+
+ax.set_title("3D Визуализация набора данных Banknote Authentication")
+ax.legend()
+
+plt.show()

@@ -50,25 +50,27 @@ with st.sidebar:
 
 st.subheader("📊 Анализ данных")
 
-# 1. Гистограммы для каждого признака
-fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+# Графики для всех признаков: гистограммы и графики плотности
+st.subheader("Гистограммы и графики плотности для всех признаков")
+
+fig, axes = plt.subplots(4, 2, figsize=(12, 20))
+
 for i, col in enumerate(["variance", "skewness", "curtosis", "entropy"]):
-    ax = axes[i // 2, i % 2]
-    ax.hist(df[col], bins=30, color="skyblue", edgecolor="black")
-    ax.set_title(f"Гистограмма: {col}")
-    ax.set_xlabel(col)
-    ax.set_ylabel("Частота")
+    # Гистограмма
+    ax_hist = axes[i, 0]
+    sns.histplot(df[col], ax=ax_hist, bins=30, kde=False, color='skyblue', alpha=0.6)
+    ax_hist.set_title(f"Гистограмма: {col}")
+    ax_hist.set_xlabel(col)
+    ax_hist.set_ylabel("Частота")
+
+    # График плотности
+    ax_kde = axes[i, 1]
+    sns.kdeplot(data=df, x=col, hue='class', fill=True, ax=ax_kde, palette='Set1', alpha=0.5)
+    ax_kde.set_title(f"Плотность распределения: {col} по классам")
+    ax_kde.set_xlabel(col)
+    ax_kde.set_ylabel("Плотность")
 
 # Увеличиваем отступы между графиками
-plt.subplots_adjust(wspace=0.4, hspace=0.4)  # Увеличение горизонтального и вертикального отступов
+plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
 st.pyplot(fig)
-
-# 2. График рассеяния между variance и entropy
-st.subheader("График рассеяния: Variance vs. Entropy")
-plt.figure(figsize=(8, 6))
-sns.scatterplot(data=df, x='variance', y='entropy', hue='class', palette='Set1', alpha=0.7)
-plt.title("Зависимость Variance от Entropy")
-plt.xlabel("Variance")
-plt.ylabel("Entropy")
-st.pyplot(plt)

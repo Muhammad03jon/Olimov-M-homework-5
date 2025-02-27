@@ -8,9 +8,6 @@ st.title('Предсказание реальной или фальшивой б
 
 file_path = "https://raw.githubusercontent.com/Muhammad03jon/Olimov-M-homework-5/refs/heads/master/data_banknote_authentication.txt"
 
-with open(file_path, "r") as file:
-    lines = file.readlines()
-
 df = pd.read_csv(file_path, sep=",", header=None)
 df.columns = ["variance", "skewness", "curtosis", "entropy", "class"]
 

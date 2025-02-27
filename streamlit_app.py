@@ -24,7 +24,7 @@ with st.expander('Data'):
 
     with col2:
         st.subheader("y (Target)")
-        y_raw = df.class
+        y_raw = df['class']
         st.dataframe(y_raw.to_frame().style.set_properties(**{'background-color': '#e8f4ea', 'color': 'black'}))
 
 

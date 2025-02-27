@@ -17,7 +17,7 @@ file_path = "https://raw.githubusercontent.com/Muhammad03jon/Olimov-M-homework-5
 df = pd.read_csv(file_path, sep=",", header=None)
 df.columns = ["variance", "skewness", "curtosis", "entropy", "class"]
 
-with st.expander('📂 Исходные данные'):
+with st.expander('Исходные данные'):
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("X (Признаки)")
@@ -28,9 +28,9 @@ with st.expander('📂 Исходные данные'):
         y_raw = df['class']
         st.dataframe(y_raw.to_frame())
 
-# Ввод данных пользователем
+# Ввод данных
 with st.sidebar:
-    st.header("🎛 Выбор модели и гиперпараметров")
+    st.header("Выбор модели и гиперпараметров")
     model_choice = st.selectbox("Выберите модель:", ["KNN", "Логистическая регрессия", "Дерево решений"])
 
     if model_choice == "KNN":
@@ -51,7 +51,6 @@ with st.sidebar:
         curtosis = st.slider('Curtosis', float(df["curtosis"].min()), float(df["curtosis"].max()), float(df["curtosis"].mean()))
         entropy = st.slider('Entropy', float(df["entropy"].min()), float(df["entropy"].max()), float(df["entropy"].mean()))
 
-    # Отображение выбранных значений
     st.write("**Выбранные значения:**")
     st.write(f"Variance: {variance}")
     st.write(f"Skewness: {skewness}")
@@ -75,7 +74,7 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Инициализация выбранной модели
+#  Выбор моделей
 if model_choice == "KNN":
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
 elif model_choice == "Логистическая регрессия":
@@ -86,7 +85,7 @@ elif model_choice == "Дерево решений":
 # Обучение модели
 model.fit(X_train_scaled, y_train)
 
-# Кнопка для предсказания
+# Кнопка предсказаний
 if st.button("Предсказать"):
     data = {"variance": variance, "skewness": skewness, "curtosis": curtosis, "entropy": entropy}
     sample_df = pd.DataFrame([data])
@@ -97,8 +96,8 @@ if st.button("Предсказать"):
     st.subheader("🔮 Результаты предсказания")
     st.metric("Предсказание", "Реальная" if prediction == 0 else "Фальшивая")
 
-# Тестирование точности на новых данных
-st.header("📥 Тестирование на новых данных")
+# Тестирование на новых данных
+st.header("Тестирование на новых данных")
 uploaded_file = st.file_uploader("Загрузите CSV файл с новыми банкнотами", type="csv")
 if uploaded_file is not None:
     new_data = pd.read_csv(uploaded_file)

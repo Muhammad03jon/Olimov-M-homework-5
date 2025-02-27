@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix, classification_report, roc_curve, auc
 
 st.title('💵 Предсказание реальной или фальшивой банкноты')
 
@@ -37,6 +37,9 @@ with st.sidebar:
         n_neighbors = st.slider('n_neighbors', 1, 20, 3)
     elif model_choice == "Дерево решений":
         max_depth = st.slider('max_depth', 1, 10, 5)
+    elif model_choice == "Логистическая регрессия":
+        solver = st.selectbox("Выберите алгоритм оптимизации:", ["liblinear", "lbfgs", "sag", "saga"])
+        C = st.slider('C (обратная регуляризация)', 0.01, 10.0, 1.0)
 
     use_random_sample = st.checkbox("📌 Использовать случайный образец")
     if use_random_sample:
@@ -76,8 +79,8 @@ X_test_scaled = scaler.transform(X_test)
 if model_choice == "KNN":
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
 elif model_choice == "Логистическая регрессия":
-    model = LogisticRegression(max_iter=565)
-else:  # Дерево решений
+    model = LogisticRegression(solver=solver, C=C, max_iter=565)
+elif model_choice == "Дерево решений":
     model = DecisionTreeClassifier(max_depth=max_depth)
 
 # Обучение модели
@@ -85,7 +88,7 @@ model.fit(X_train_scaled, y_train)
 
 # Кнопка для предсказания
 if st.button("Предсказать"):
-    data = {"variance": variance, "skewness": skewness, "curtosis": curtosis, "entropy": entropy}  # Определение data
+    data = {"variance": variance, "skewness": skewness, "curtosis": curtosis, "entropy": entropy}
     sample_df = pd.DataFrame([data])
     sample_scaled = scaler.transform(sample_df)
 
@@ -117,6 +120,7 @@ if model_choice == "Дерево решений":
 # Графики метрик качества моделей
 if st.button("Показать метрики качества"):
     y_pred = model.predict(X_test_scaled)
+    accuracy = (y_pred == y_test).mean()
     st.subheader("📊 Метрики качества модели")
     st.write("Матрица ошибок:")
     conf_matrix = confusion_matrix(y_test, y_pred)
@@ -125,3 +129,20 @@ if st.button("Показать метрики качества"):
     report = classification_report(y_test, y_pred, output_dict=True)
     st.write("Отчет по метрикам:")
     st.write(f"Precision: {report['0']['precision']:.2f}, Recall: {report['0']['recall']:.2f}, F1-score: {report['0']['f1-score']:.2f}")
+    st.write(f"Accuracy: {accuracy:.2f}")
+
+    # ROC AUC
+    y_scores = model.predict_proba(X_test_scaled)[:, 1]
+    fpr, tpr, thresholds = roc_curve(y_test, y_scores)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure()
+    plt.plot(fpr, tpr, label=f'ROC curve (area = {roc_auc:.2f})')
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC)')
+    plt.legend(loc="lower right")
+    st.pyplot()
